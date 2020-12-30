@@ -635,7 +635,7 @@ final class RootViewController: UIViewController {
             // now check if we'll delete readings
             // there must be a glucoseData.last, here assigning lastGlucoseData just to unwrap it
             // checking lastGlucoseData.timeStamp < timeStampToDelete guarantees the oldest reading is older than the one we'll delete, so we're sur we have enough readings in glucoseData to refill the BgReadings
-            if let lastGlucoseData = glucoseData.last, lastGlucoseData.timeStamp < timeStampToDelete, UserDefaults.standard.smoothLibreValues {
+           /* if let lastGlucoseData = glucoseData.last, lastGlucoseData.timeStamp < timeStampToDelete, UserDefaults.standard.smoothLibreValues {
                 
                 // older than the timestamp of the latest reading
                 if let last = glucoseData.last {
@@ -697,7 +697,7 @@ final class RootViewController: UIViewController {
                 // this is the easiest way to achieve it
                 glucoseChartManager?.cleanUpMemory()
 
-            }
+            }*/
 
             // was a new reading created or not ?
             var newReadingCreated = false

@@ -112,8 +112,19 @@ class LibreDataParser {
         // smooth, if required
         if UserDefaults.standard.smoothLibreValues {
             
+            trace("before kalman", log: log, category: ConstantsLog.categoryLibreDataParser, type: .info)
+            for (_, value) in trend.enumerated().reversed() {
+                trace("value = %{public}@", log: log, category: ConstantsLog.categoryLibreDataParser, type: .info, value.glucoseLevelRaw.description.replacingOccurrences(of: ".", with: ","))
+            }
+
             // apply SavitzkyGolayFilter
             LibreSmoothing.smooth(trend: &trend, repeatPerMinuteSmoothingSavitzkyGolay: ConstantsLibreSmoothing.libreSmoothingRepeatPerMinuteSmoothing, filterWidthPerMinuteValuesSavitzkyGolay: ConstantsLibreSmoothing.filterWidthPerMinuteValues, filterWidthPer5MinuteValuesSavitzkyGolay: ConstantsLibreSmoothing.filterWidthPer5MinuteValues, repeatPer5MinuteSmoothingSavitzkyGolay: ConstantsLibreSmoothing.repeatPer5MinuteSmoothing)
+            
+            trace("after kalman", log: log, category: ConstantsLog.categoryLibreDataParser, type: .info)
+            for (_, value) in trend.enumerated().reversed() {
+                trace("value = %{public}@", log: log, category: ConstantsLog.categoryLibreDataParser, type: .info, value.glucoseLevelRaw.description.replacingOccurrences(of: ".", with: ","))
+            }
+
             
         }
         
