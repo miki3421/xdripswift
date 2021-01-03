@@ -27,7 +27,7 @@ class LibreSmoothing {
         }*/
 
         // apply Kalman filter
-        LibreSmoothing.smoothWithKalmanFilter(trend: &trend, filterNoise: 2.5)
+        //LibreSmoothing.smoothWithKalmanFilter(trend: &trend, filterNoise: 2.5)
 
      /*   debuglogging("trend after kalman filter")
         for (_, value) in trend.enumerated().reversed() {

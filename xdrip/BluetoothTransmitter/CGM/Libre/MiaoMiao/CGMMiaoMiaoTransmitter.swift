@@ -417,11 +417,11 @@ class CGMMiaoMiaoTransmitter:BluetoothTransmitter, CGMTransmitter {
             serialNumberAsHexStringToUse = sampleSerialNumberInHex
         }
         
-        var patchInfoAsHexStringToUse = ""
+        var patchInfoAsHexStringToUse: String? = ""
         if let patchInfoAsHexString = patchInfoAsHexString {
             patchInfoAsHexStringToUse = patchInfoAsHexString
         } else {
-            patchInfoAsHexStringToUse = samplePatchInfoInHex
+            patchInfoAsHexStringToUse = nil
         }
         
         if rxBuffer.count == 0 {
@@ -451,8 +451,10 @@ class CGMMiaoMiaoTransmitter:BluetoothTransmitter, CGMTransmitter {
 
             rxBuffer = rxBuffer + Data(hexadecimalString: "20")! // 362 + 1 = 363
 
-            rxBuffer = rxBuffer +
-                Data(hexadecimalString: patchInfoAsHexStringToUse)! // 363 + 6 = 369
+            if let patchInfoAsHexStringToUse = patchInfoAsHexStringToUse {
+                rxBuffer = rxBuffer +
+                    Data(hexadecimalString: patchInfoAsHexStringToUse)! // 363 + 6 = 369
+            }
 
             
         }
@@ -504,16 +506,19 @@ class CGMMiaoMiaoTransmitter:BluetoothTransmitter, CGMTransmitter {
                         // get sensor serialNumber and if changed inform delegate
                         if let libreSensorSerialNumber = LibreSensorSerialNumber(withUID: Data(rxBuffer.subdata(in: 5..<13))) {
                             
-                            // (there will also be a seperate opcode form MiaoMiao because it's able to detect new sensor also)
+                            // (there will also be a seperate opcode from MiaoMiao because it's able to detect new sensor also)
                             if libreSensorSerialNumber.serialNumber != previousSensorSerialNumber {
                                 
                                 previousSensorSerialNumber = libreSensorSerialNumber.serialNumber
+                                
+                                // inform delegate about new sensor detected
+                                cGMTransmitterDelegate?.newSensorDetected()
                                 
                             }
                             
                         }
                         
-                        libreDataParser.libreDataProcessor(libreSensorSerialNumber: LibreSensorSerialNumber(withUID: Data(rxBuffer.subdata(in: 5..<13))), patchInfo: patchInfo, webOOPEnabled: true, oopWebSite: ConstantsLibre.site, oopWebToken: ConstantsLibre.token, libreData: (rxBuffer.subdata(in: miaoMiaoHeaderLength..<(344 + miaoMiaoHeaderLength))), cgmTransmitterDelegate: cGMTransmitterDelegate, dataIsDecryptedToLibre1Format: dataIsDecryptedToLibre1Format, testTimeStamp: testTimeStamp, completionHandler: { (sensorState: LibreSensorState?, xDripError: XdripError?) in
+                        libreDataParser.libreDataProcessor(libreSensorSerialNumber: LibreSensorSerialNumber(withUID: Data(rxBuffer.subdata(in: 5..<13))), patchInfo: patchInfo, webOOPEnabled: false, oopWebSite: ConstantsLibre.site, oopWebToken: ConstantsLibre.token, libreData: (rxBuffer.subdata(in: miaoMiaoHeaderLength..<(344 + miaoMiaoHeaderLength))), cgmTransmitterDelegate: cGMTransmitterDelegate, dataIsDecryptedToLibre1Format: dataIsDecryptedToLibre1Format, testTimeStamp: testTimeStamp, completionHandler: { (sensorState: LibreSensorState?, xDripError: XdripError?) in
                             
                         })
                         
@@ -542,9 +547,9 @@ class CGMMiaoMiaoTransmitter:BluetoothTransmitter, CGMTransmitter {
     public static func testRange(cGMTransmitterDelegate: CGMTransmitterDelegate?) {
         
         var testData = [String]()
-        var patchInfoRange = [String]()
+        //var patchInfoRange = [String]()
         var sampleLibreDataInHex = ""
-        
+        /*
         // the first element is taken from another range of tests
         sampleLibreDataInHex = "4cfb9faa1b977983833063becebdb941"
         sampleLibreDataInHex = sampleLibreDataInHex + "a8497d3f8b0817df5d38ac51fb6f221d"
@@ -959,7 +964,809 @@ class CGMMiaoMiaoTransmitter:BluetoothTransmitter, CGMTransmitter {
         sampleLibreDataInHex = sampleLibreDataInHex + "dac0aeb91120b353"
         
         testData.append(sampleLibreDataInHex)
-        patchInfoRange.append("9D083001831B")
+        patchInfoRange.append("9D083001831B")*/
+        /**
+         TEST DATA FOR LIBRE 1
+        */
+        sampleLibreDataInHex = ""
+        sampleLibreDataInHex = sampleLibreDataInHex + "7817901b030000000000000000000000"
+        sampleLibreDataInHex = sampleLibreDataInHex + "0000000000000000a6e00b1aed07c8f8"
+        sampleLibreDataInHex = sampleLibreDataInHex + "da00ee07c8009b00f707c8049b00e707"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8d49a00eb07c8ec9a00ef07c86c9b00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "f007c8cc9b00e807c8fc9b00e707c824"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9c00ea07c8489c00f507c86c9c00a807"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8c89b00b107c8a0db00c107c8809b00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "d907c8609b00f407c8349b000508c820"
+        sampleLibreDataInHex = sampleLibreDataInHex + "db00fd08c824db00de09c8089b00c709"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8089b001309c8249b00ab07c870da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "f405c8d09a007f04c8489b002104c8d4"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b004d04c8609c009f04c8c89b00a704"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c810db009304c8fcda001a05c8a8da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "6305c850da00b504c8c8d900c803c814"
+        sampleLibreDataInHex = sampleLibreDataInHex + "da00a903c868da007604c8d09a005405"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8d4da004306c8c8da00c706c88cdb00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "3007c8c0db005207c80cdc008907c804"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9c00eb07c86c9b00ad06c8301701b506"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c86817018f06c8c4d9009c06c850da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "4507c8949b006507c8089b000c270000"
+        sampleLibreDataInHex = sampleLibreDataInHex + "d6120001740ab150140796805a00eda6"
+        sampleLibreDataInHex = sampleLibreDataInHex + "148e1ac8048b896c"
+        
+        testData.append(sampleLibreDataInHex)
+        sampleLibreDataInHex = ""
+        sampleLibreDataInHex = sampleLibreDataInHex + "7817901b030000000000000000000000"
+        sampleLibreDataInHex = sampleLibreDataInHex + "0000000000000000d6500e1aed07c8f8"
+        sampleLibreDataInHex = sampleLibreDataInHex + "da00ee07c8009b00f707c8049b00e707"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8d49a00eb07c8ec9a00ef07c86c9b00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "f007c8cc9b00e807c8fc9b00e707c824"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9c00ea07c8489c00f507c86c9c001408"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8fc9b007308c8b89b006308c8cc9b00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "d907c8609b00f407c8349b000508c820"
+        sampleLibreDataInHex = sampleLibreDataInHex + "db00fd08c824db00de09c8089b00c709"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8089b001309c8249b00ab07c870da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "f405c8d09a007f04c8489b002104c8d4"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b004d04c8609c009f04c8c89b00a704"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c810db009304c8fcda001a05c8a8da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "6305c850da00b504c8c8d900c803c814"
+        sampleLibreDataInHex = sampleLibreDataInHex + "da00a903c868da007604c8d09a005405"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8d4da004306c8c8da00c706c88cdb00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "3007c8c0db005207c80cdc008907c804"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9c00eb07c86c9b00ad06c8301701b506"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c86817018f06c8c4d9009c06c850da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "4507c8949b006507c8089b000f270000"
+        sampleLibreDataInHex = sampleLibreDataInHex + "d6120001740ab150140796805a00eda6"
+        sampleLibreDataInHex = sampleLibreDataInHex + "148e1ac8048b896c"
+        
+        testData.append(sampleLibreDataInHex)
+        sampleLibreDataInHex = ""
+        sampleLibreDataInHex = sampleLibreDataInHex + "7817901b030000000000000000000000"
+        sampleLibreDataInHex = sampleLibreDataInHex + "000000000000000086050f1aed07c8f8"
+        sampleLibreDataInHex = sampleLibreDataInHex + "da00ee07c8009b00f707c8049b00e707"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8d49a00eb07c8ec9a00ef07c86c9b00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "f007c8cc9b00e807c8fc9b00e707c824"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9c00ea07c8489c00f507c86c9c001408"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8fc9b007308c8b89b006308c8cc9b00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "6208c8749b00f407c8349b000508c820"
+        sampleLibreDataInHex = sampleLibreDataInHex + "db00fd08c824db00de09c8089b00c709"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8089b001309c8249b00ab07c870da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "f405c8d09a007f04c8489b002104c8d4"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b004d04c8609c009f04c8c89b00a704"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c810db009304c8fcda001a05c8a8da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "6305c850da00b504c8c8d900c803c814"
+        sampleLibreDataInHex = sampleLibreDataInHex + "da00a903c868da007604c8d09a005405"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8d4da004306c8c8da00c706c88cdb00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "3007c8c0db005207c80cdc008907c804"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9c00eb07c86c9b00ad06c8301701b506"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c86817018f06c8c4d9009c06c850da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "4507c8949b006507c8089b0010270000"
+        sampleLibreDataInHex = sampleLibreDataInHex + "d6120001740ab150140796805a00eda6"
+        sampleLibreDataInHex = sampleLibreDataInHex + "148e1ac8048b896c"
+        
+        testData.append(sampleLibreDataInHex)
+        sampleLibreDataInHex = ""
+        sampleLibreDataInHex = sampleLibreDataInHex + "7817901b030000000000000000000000"
+        sampleLibreDataInHex = sampleLibreDataInHex + "0000000000000000da7e041a5408c818"
+        sampleLibreDataInHex = sampleLibreDataInHex + "db001e08c8409b000508c8549b000708"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8349b00eb07c8ec9a00ef07c86c9b00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "f007c8cc9b00e807c8fc9b00e707c824"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9c00ea07c8489c00f507c86c9c001408"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8fc9b007308c8b89b006308c8cc9b00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "6208c8749b002e08c82c9b000508c820"
+        sampleLibreDataInHex = sampleLibreDataInHex + "db00fd08c824db00de09c8089b00c709"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8089b001309c8249b00ab07c870da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "f405c8d09a007f04c8489b002104c8d4"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b004d04c8609c009f04c8c89b00a704"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c810db009304c8fcda001a05c8a8da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "6305c850da00b504c8c8d900c803c814"
+        sampleLibreDataInHex = sampleLibreDataInHex + "da00a903c868da007604c8d09a005405"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8d4da004306c8c8da00c706c88cdb00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "3007c8c0db005207c80cdc008907c804"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9c00eb07c86c9b00ad06c8301701b506"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c86817018f06c8c4d9009c06c850da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "4507c8949b006507c8089b0015270000"
+        sampleLibreDataInHex = sampleLibreDataInHex + "d6120001740ab150140796805a00eda6"
+        sampleLibreDataInHex = sampleLibreDataInHex + "148e1ac8048b896c"
+        
+        
+        testData.append(sampleLibreDataInHex)
+        sampleLibreDataInHex = ""
+        sampleLibreDataInHex = sampleLibreDataInHex + "7817901b030000000000000000000000"
+        sampleLibreDataInHex = sampleLibreDataInHex + "00000000000000002ad4051a5408c818"
+        sampleLibreDataInHex = sampleLibreDataInHex + "db001e08c8409b000508c8549b000708"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8349b000a08c8549b00ef07c86c9b00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "f007c8cc9b00e807c8fc9b00e707c824"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9c00ea07c8489c00f507c86c9c001408"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8fc9b007308c8b89b006308c8cc9b00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "6208c8749b002e08c82c9b000508c820"
+        sampleLibreDataInHex = sampleLibreDataInHex + "db00fd08c824db00de09c8089b00c709"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8089b001309c8249b00ab07c870da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "f405c8d09a007f04c8489b002104c8d4"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b004d04c8609c009f04c8c89b00a704"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c810db009304c8fcda001a05c8a8da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "6305c850da00b504c8c8d900c803c814"
+        sampleLibreDataInHex = sampleLibreDataInHex + "da00a903c868da007604c8d09a005405"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8d4da004306c8c8da00c706c88cdb00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "3007c8c0db005207c80cdc008907c804"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9c00eb07c86c9b00ad06c8301701b506"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c86817018f06c8c4d9009c06c850da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "4507c8949b006507c8089b0016270000"
+        sampleLibreDataInHex = sampleLibreDataInHex + "d6120001740ab150140796805a00eda6"
+        sampleLibreDataInHex = sampleLibreDataInHex + "148e1ac8048b896c"
+        
+        testData.append(sampleLibreDataInHex)
+        sampleLibreDataInHex = ""
+        sampleLibreDataInHex = sampleLibreDataInHex + "7817901b030000000000000000000000"
+        sampleLibreDataInHex = sampleLibreDataInHex + "00000000000000006faf0a1b5408c818"
+        sampleLibreDataInHex = sampleLibreDataInHex + "db001e08c8409b000508c8549b000708"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8349b000a08c8549b00f007c8a8db00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "d907c8dc9b00cf07c8cc9b00c407c8b8"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b00b307c8ac9b00f507c86c9c001408"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8fc9b007308c8b89b006308c8cc9b00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "6208c8749b002e08c82c9b000508c820"
+        sampleLibreDataInHex = sampleLibreDataInHex + "db00fd08c824db00de09c8089b00c709"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8089b001309c8249b00ab07c870da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "f405c8d09a007f04c8489b002104c8d4"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b004d04c8609c009f04c8c89b00a704"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c810db009304c8fcda001a05c8a8da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "6305c850da00b504c8c8d900c803c814"
+        sampleLibreDataInHex = sampleLibreDataInHex + "da00a903c868da007604c8d09a005405"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8d4da004306c8c8da00c706c88cdb00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "3007c8c0db005207c80cdc008907c804"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9c00eb07c86c9b00f907c8549b00b506"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c86817018f06c8c4d9009c06c850da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "4507c8949b006507c8089b001b270000"
+        sampleLibreDataInHex = sampleLibreDataInHex + "d6120001740ab150140796805a00eda6"
+        sampleLibreDataInHex = sampleLibreDataInHex + "148e1ac8048b896c"
+        
+        
+        
+        
+        
+        
+        testData.append(sampleLibreDataInHex)
+        sampleLibreDataInHex = ""
+        sampleLibreDataInHex = sampleLibreDataInHex + "7817901b030000000000000000000000"
+        sampleLibreDataInHex = sampleLibreDataInHex + "0000000000000000fa320f1b5408c818"
+        sampleLibreDataInHex = sampleLibreDataInHex + "db001e08c8409b000508c8549b000708"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8349b000a08c8549b00f007c8a8db00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "d907c8dc9b00cf07c8cc9b00c407c8b8"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b00b307c8ac9b009807c8809b009107"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8789b009307c8849b009207c8809b00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9307c8749b002e08c82c9b000508c820"
+        sampleLibreDataInHex = sampleLibreDataInHex + "db00fd08c824db00de09c8089b00c709"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8089b001309c8249b00ab07c870da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "f405c8d09a007f04c8489b002104c8d4"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b004d04c8609c009f04c8c89b00a704"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c810db009304c8fcda001a05c8a8da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "6305c850da00b504c8c8d900c803c814"
+        sampleLibreDataInHex = sampleLibreDataInHex + "da00a903c868da007604c8d09a005405"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8d4da004306c8c8da00c706c88cdb00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "3007c8c0db005207c80cdc008907c804"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9c00eb07c86c9b00f907c8549b00b506"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c86817018f06c8c4d9009c06c850da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "4507c8949b006507c8089b0020270000"
+        sampleLibreDataInHex = sampleLibreDataInHex + "d6120001740ab150140796805a00eda6"
+        sampleLibreDataInHex = sampleLibreDataInHex + "148e1ac8048b896c"
+        
+        
+        
+        
+        
+        testData.append(sampleLibreDataInHex)
+        sampleLibreDataInHex = ""
+        sampleLibreDataInHex = sampleLibreDataInHex + "7817901b030000000000000000000000"
+        sampleLibreDataInHex = sampleLibreDataInHex + "000000000000000040d9041b8a07c854"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b009607c83c9b009207c8309b008e07"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c808db000a08c8549b00f007c8a8db00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "d907c8dc9b00cf07c8cc9b00c407c8b8"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b00b307c8ac9b009807c8809b009107"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8789b009307c8849b009207c8809b00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9307c8749b008207c86c9b000508c820"
+        sampleLibreDataInHex = sampleLibreDataInHex + "db00fd08c824db00de09c8089b00c709"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8089b001309c8249b00ab07c870da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "f405c8d09a007f04c8489b002104c8d4"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b004d04c8609c009f04c8c89b00a704"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c810db009304c8fcda001a05c8a8da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "6305c850da00b504c8c8d900c803c814"
+        sampleLibreDataInHex = sampleLibreDataInHex + "da00a903c868da007604c8d09a005405"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8d4da004306c8c8da00c706c88cdb00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "3007c8c0db005207c80cdc008907c804"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9c00eb07c86c9b00f907c8549b00b506"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c86817018f06c8c4d9009c06c850da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "4507c8949b006507c8089b0025270000"
+        sampleLibreDataInHex = sampleLibreDataInHex + "d6120001740ab150140796805a00eda6"
+        sampleLibreDataInHex = sampleLibreDataInHex + "148e1ac8048b896c"
+        
+        
+        
+        testData.append(sampleLibreDataInHex)
+        sampleLibreDataInHex = ""
+        sampleLibreDataInHex = sampleLibreDataInHex + "7817901b030000000000000000000000"
+        sampleLibreDataInHex = sampleLibreDataInHex + "00000000000000000847091c8a07c854"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b009607c83c9b009207c8309b008e07"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c808db009707c8009b009c07c80c9b00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9f07c80c9b009407c824db009707c808"
+        sampleLibreDataInHex = sampleLibreDataInHex + "db00b307c8ac9b009807c8809b009107"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8789b009307c8849b009207c8809b00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9307c8749b008207c86c9b000508c820"
+        sampleLibreDataInHex = sampleLibreDataInHex + "db00fd08c824db00de09c8089b00c709"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8089b001309c8249b00ab07c870da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "f405c8d09a007f04c8489b002104c8d4"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b004d04c8609c009f04c8c89b00a704"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c810db009304c8fcda001a05c8a8da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "6305c850da00b504c8c8d900c803c814"
+        sampleLibreDataInHex = sampleLibreDataInHex + "da00a903c868da007604c8d09a005405"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8d4da004306c8c8da00c706c88cdb00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "3007c8c0db005207c80cdc008907c804"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9c00eb07c86c9b00f907c8549b009507"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c808db008f06c8c4d9009c06c850da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "4507c8949b006507c8089b002a270000"
+        sampleLibreDataInHex = sampleLibreDataInHex + "d6120001740ab150140796805a00eda6"
+        sampleLibreDataInHex = sampleLibreDataInHex + "148e1ac8048b896c"
+        
+        
+        
+        
+        
+        
+        
+        testData.append(sampleLibreDataInHex)
+        sampleLibreDataInHex = ""
+        sampleLibreDataInHex = sampleLibreDataInHex + "7817901b030000000000000000000000"
+        sampleLibreDataInHex = sampleLibreDataInHex + "0000000000000000daae0e1c8a07c854"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b009607c83c9b009207c8309b008e07"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c808db009707c8009b009c07c80c9b00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9f07c80c9b009407c824db009707c808"
+        sampleLibreDataInHex = sampleLibreDataInHex + "db009107c8109b008307c8f4da008507"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8f89a007f07c8f0da007f07c8f09a00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9307c8749b008207c86c9b000508c820"
+        sampleLibreDataInHex = sampleLibreDataInHex + "db00fd08c824db00de09c8089b00c709"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8089b001309c8249b00ab07c870da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "f405c8d09a007f04c8489b002104c8d4"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b004d04c8609c009f04c8c89b00a704"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c810db009304c8fcda001a05c8a8da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "6305c850da00b504c8c8d900c803c814"
+        sampleLibreDataInHex = sampleLibreDataInHex + "da00a903c868da007604c8d09a005405"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8d4da004306c8c8da00c706c88cdb00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "3007c8c0db005207c80cdc008907c804"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9c00eb07c86c9b00f907c8549b009507"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c808db008f06c8c4d9009c06c850da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "4507c8949b006507c8089b002f270000"
+        sampleLibreDataInHex = sampleLibreDataInHex + "d6120001740ab150140796805a00eda6"
+        sampleLibreDataInHex = sampleLibreDataInHex + "148e1ac8048b896c"
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        testData.append(sampleLibreDataInHex)
+        sampleLibreDataInHex = ""
+        sampleLibreDataInHex = sampleLibreDataInHex + "7817901b030000000000000000000000"
+        sampleLibreDataInHex = sampleLibreDataInHex + "0000000000000000ea16031c6f07c814"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b006a07c82c9b006807c8389b008e07"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c808db009707c8009b009c07c80c9b00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9f07c80c9b009407c824db009707c808"
+        sampleLibreDataInHex = sampleLibreDataInHex + "db009107c8109b008307c8f4da008507"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8f89a007f07c8f0da007f07c8f09a00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "7807c8f4da007407c8f89a000508c820"
+        sampleLibreDataInHex = sampleLibreDataInHex + "db00fd08c824db00de09c8089b00c709"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8089b001309c8249b00ab07c870da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "f405c8d09a007f04c8489b002104c8d4"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b004d04c8609c009f04c8c89b00a704"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c810db009304c8fcda001a05c8a8da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "6305c850da00b504c8c8d900c803c814"
+        sampleLibreDataInHex = sampleLibreDataInHex + "da00a903c868da007604c8d09a005405"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8d4da004306c8c8da00c706c88cdb00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "3007c8c0db005207c80cdc008907c804"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9c00eb07c86c9b00f907c8549b009507"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c808db008f06c8c4d9009c06c850da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "4507c8949b006507c8089b0034270000"
+        sampleLibreDataInHex = sampleLibreDataInHex + "d6120001740ab150140796805a00eda6"
+        sampleLibreDataInHex = sampleLibreDataInHex + "148e1ac8048b896c"
+        
+        
+        
+        
+        
+        
+        
+        testData.append(sampleLibreDataInHex)
+        sampleLibreDataInHex = ""
+        sampleLibreDataInHex = sampleLibreDataInHex + "7817901b030000000000000000000000"
+        sampleLibreDataInHex = sampleLibreDataInHex + "00000000000000004597081d6f07c814"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b006a07c82c9b006807c8389b006607"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8309b005e07c8189b006207c8189b00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "5b07c8249b005f07c8289b009707c808"
+        sampleLibreDataInHex = sampleLibreDataInHex + "db009107c8109b008307c8f4da008507"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8f89a007f07c8f0da007f07c8f09a00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "7807c8f4da007407c8f89a000508c820"
+        sampleLibreDataInHex = sampleLibreDataInHex + "db00fd08c824db00de09c8089b00c709"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8089b001309c8249b00ab07c870da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "f405c8d09a007f04c8489b002104c8d4"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b004d04c8609c009f04c8c89b00a704"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c810db009304c8fcda001a05c8a8da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "6305c850da00b504c8c8d900c803c814"
+        sampleLibreDataInHex = sampleLibreDataInHex + "da00a903c868da007604c8d09a005405"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8d4da004306c8c8da00c706c88cdb00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "3007c8c0db005207c80cdc008907c804"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9c00eb07c86c9b00f907c8549b009507"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c808db006707c8389b009c06c850da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "4507c8949b006507c8089b0039270000"
+        sampleLibreDataInHex = sampleLibreDataInHex + "d6120001740ab150140796805a00eda6"
+        sampleLibreDataInHex = sampleLibreDataInHex + "148e1ac8048b896c"
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        testData.append(sampleLibreDataInHex)
+        sampleLibreDataInHex = ""
+        sampleLibreDataInHex = sampleLibreDataInHex + "7817901b030000000000000000000000"
+        sampleLibreDataInHex = sampleLibreDataInHex + "00000000000000000d690d1d6f07c814"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b006a07c82c9b006807c8389b006607"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8309b005e07c8189b006207c8189b00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "5b07c8249b005f07c8289b005c07c830"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b005e07c8289b005d07c8349b005707"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8289b006407c80c9b007f07c8f09a00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "7807c8f4da007407c8f89a000508c820"
+        sampleLibreDataInHex = sampleLibreDataInHex + "db00fd08c824db00de09c8089b00c709"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8089b001309c8249b00ab07c870da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "f405c8d09a007f04c8489b002104c8d4"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b004d04c8609c009f04c8c89b00a704"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c810db009304c8fcda001a05c8a8da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "6305c850da00b504c8c8d900c803c814"
+        sampleLibreDataInHex = sampleLibreDataInHex + "da00a903c868da007604c8d09a005405"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8d4da004306c8c8da00c706c88cdb00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "3007c8c0db005207c80cdc008907c804"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9c00eb07c86c9b00f907c8549b009507"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c808db006707c8389b009c06c850da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "4507c8949b006507c8089b003e270000"
+        sampleLibreDataInHex = sampleLibreDataInHex + "d6120001740ab150140796805a00eda6"
+        sampleLibreDataInHex = sampleLibreDataInHex + "148e1ac8048b896c"
+        
+        
+        
+        
+        
+        testData.append(sampleLibreDataInHex)
+        sampleLibreDataInHex = ""
+        sampleLibreDataInHex = sampleLibreDataInHex + "7817901b030000000000000000000000"
+        sampleLibreDataInHex = sampleLibreDataInHex + "0000000000000000075d021d6407c810"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b006a07c80c9b006807c8389b006607"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8309b005e07c8189b006207c8189b00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "5b07c8249b005f07c8289b005c07c830"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b005e07c8289b005d07c8349b005707"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8289b006407c80c9b005907c8e49a00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "6507c8f09a007107c8f8da000508c820"
+        sampleLibreDataInHex = sampleLibreDataInHex + "db00fd08c824db00de09c8089b00c709"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8089b001309c8249b00ab07c870da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "f405c8d09a007f04c8489b002104c8d4"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b004d04c8609c009f04c8c89b00a704"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c810db009304c8fcda001a05c8a8da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "6305c850da00b504c8c8d900c803c814"
+        sampleLibreDataInHex = sampleLibreDataInHex + "da00a903c868da007604c8d09a005405"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8d4da004306c8c8da00c706c88cdb00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "3007c8c0db005207c80cdc008907c804"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9c00eb07c86c9b00f907c8549b009507"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c808db006707c8389b009c06c850da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "4507c8949b006507c8089b0043270000"
+        sampleLibreDataInHex = sampleLibreDataInHex + "d6120001740ab150140796805a00eda6"
+        sampleLibreDataInHex = sampleLibreDataInHex + "148e1ac8048b896c"
+        
+        
+        testData.append(sampleLibreDataInHex)
+        sampleLibreDataInHex = ""
+        sampleLibreDataInHex = sampleLibreDataInHex + "7817901b030000000000000000000000"
+        sampleLibreDataInHex = sampleLibreDataInHex + "0000000000000000032f081e6407c810"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b006a07c80c9b006607c8f09a006607"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8389b007307c8dc9a007507c8d09a00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "7107c8e49a006407c80c9b005c07c830"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b005e07c8289b005d07c8349b005707"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8289b006407c80c9b005907c8e49a00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "6507c8f09a007107c8f8da000508c820"
+        sampleLibreDataInHex = sampleLibreDataInHex + "db00fd08c824db00de09c8089b00c709"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8089b001309c8249b00ab07c870da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "f405c8d09a007f04c8489b002104c8d4"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b004d04c8609c009f04c8c89b00a704"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c810db009304c8fcda001a05c8a8da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "6305c850da00b504c8c8d900c803c814"
+        sampleLibreDataInHex = sampleLibreDataInHex + "da00a903c868da007604c8d09a005405"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8d4da004306c8c8da00c706c88cdb00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "3007c8c0db005207c80cdc008907c804"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9c00eb07c86c9b00f907c8549b009507"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c808db006707c8389b006807c80c9b00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "4507c8949b006507c8089b0049270000"
+        
+        testData.append(sampleLibreDataInHex)
+        sampleLibreDataInHex = ""
+        sampleLibreDataInHex = sampleLibreDataInHex + "7817901b030000000000000000000000"
+        sampleLibreDataInHex = sampleLibreDataInHex + "0000000000000000032f081e6407c810"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b006a07c80c9b006607c8f09a006607"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8389b007307c8dc9a007507c8d09a00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "7107c8e49a006407c80c9b005c07c830"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b005e07c8289b005d07c8349b005707"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8289b006407c80c9b005907c8e49a00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "6507c8f09a007107c8f8da000508c820"
+        sampleLibreDataInHex = sampleLibreDataInHex + "db00fd08c824db00de09c8089b00c709"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8089b001309c8249b00ab07c870da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "f405c8d09a007f04c8489b002104c8d4"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b004d04c8609c009f04c8c89b00a704"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c810db009304c8fcda001a05c8a8da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "6305c850da00b504c8c8d900c803c814"
+        sampleLibreDataInHex = sampleLibreDataInHex + "da00a903c868da007604c8d09a005405"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8d4da004306c8c8da00c706c88cdb00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "3007c8c0db005207c80cdc008907c804"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9c00eb07c86c9b00f907c8549b009507"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c808db006707c8389b006807c80c9b00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "4507c8949b006507c8089b0049270000"
+        sampleLibreDataInHex = sampleLibreDataInHex + "d6120001740ab150140796805a00eda6"
+        sampleLibreDataInHex = sampleLibreDataInHex + "148e1ac8048b896c"
+        
+        testData.append(sampleLibreDataInHex)
+        sampleLibreDataInHex = ""
+        sampleLibreDataInHex = sampleLibreDataInHex + "7817901b030000000000000000000000"
+        sampleLibreDataInHex = sampleLibreDataInHex + "000000000000000051b50a1e6407c810"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b006a07c80c9b006607c8f09a006607"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8389b007307c8dc9a007507c8d09a00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "7107c8e49a006407c80c9b005807c860"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b004507c83c9b005d07c8349b005707"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8289b006407c80c9b005907c8e49a00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "6507c8f09a007107c8f8da000508c820"
+        sampleLibreDataInHex = sampleLibreDataInHex + "db00fd08c824db00de09c8089b00c709"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8089b001309c8249b00ab07c870da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "f405c8d09a007f04c8489b002104c8d4"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b004d04c8609c009f04c8c89b00a704"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c810db009304c8fcda001a05c8a8da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "6305c850da00b504c8c8d900c803c814"
+        sampleLibreDataInHex = sampleLibreDataInHex + "da00a903c868da007604c8d09a005405"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8d4da004306c8c8da00c706c88cdb00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "3007c8c0db005207c80cdc008907c804"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9c00eb07c86c9b00f907c8549b009507"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c808db006707c8389b006807c80c9b00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "4507c8949b006507c8089b004b270000"
+        sampleLibreDataInHex = sampleLibreDataInHex + "d6120001740ab150140796805a00eda6"
+        sampleLibreDataInHex = sampleLibreDataInHex + "148e1ac8048b896c"
+        
+        testData.append(sampleLibreDataInHex)
+        sampleLibreDataInHex = ""
+        sampleLibreDataInHex = sampleLibreDataInHex + "7817901b030000000000000000000000"
+        sampleLibreDataInHex = sampleLibreDataInHex + "0000000000000000893b0e1e6407c810"
+        
+        
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b006a07c80c9b006607c8f09a006607"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8389b007307c8dc9a007507c8d09a00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "7107c8e49a006407c80c9b005807c860"
+        
+        
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b004507c83c9b003407c8e09b001e07"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8205c000807c8289c00fb06c83c9c00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "6507c8f09a007107c8f8da000508c820"
+        sampleLibreDataInHex = sampleLibreDataInHex + "db00fd08c824db00de09c8089b00c709"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8089b001309c8249b00ab07c870da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "f405c8d09a007f04c8489b002104c8d4"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b004d04c8609c009f04c8c89b00a704"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c810db009304c8fcda001a05c8a8da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "6305c850da00b504c8c8d900c803c814"
+        sampleLibreDataInHex = sampleLibreDataInHex + "da00a903c868da007604c8d09a005405"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8d4da004306c8c8da00c706c88cdb00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "3007c8c0db005207c80cdc008907c804"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9c00eb07c86c9b00f907c8549b009507"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c808db006707c8389b006807c80c9b00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "4507c8949b006507c8089b004f270000"
+        sampleLibreDataInHex = sampleLibreDataInHex + "d6120001740ab150140796805a00eda6"
+        sampleLibreDataInHex = sampleLibreDataInHex + "148e1ac8048b896c"
+        
+        testData.append(sampleLibreDataInHex)
+        sampleLibreDataInHex = ""
+        
+        sampleLibreDataInHex = sampleLibreDataInHex + "7817901b030000000000000000000000"
+        sampleLibreDataInHex = sampleLibreDataInHex + "0000000000000000dad00f1e6407c810"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b006a07c80c9b006607c8f09a006607"
+        
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8389b007307c8dc9a007507c8d09a00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "7107c8e49a006407c80c9b005807c860"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b004507c83c9b003407c8e09b001e07"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8205c000807c8289c00fb06c83c9c00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "fb06c8489c007107c8f8da000508c820"
+        sampleLibreDataInHex = sampleLibreDataInHex + "db00fd08c824db00de09c8089b00c709"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8089b001309c8249b00ab07c870da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "f405c8d09a007f04c8489b002104c8d4"
+        
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b004d04c8609c009f04c8c89b00a704"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c810db009304c8fcda001a05c8a8da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "6305c850da00b504c8c8d900c803c814"
+        sampleLibreDataInHex = sampleLibreDataInHex + "da00a903c868da007604c8d09a005405"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8d4da004306c8c8da00c706c88cdb00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "3007c8c0db005207c80cdc008907c804"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9c00eb07c86c9b00f907c8549b009507"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c808db006707c8389b006807c80c9b00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "4507c8949b006507c8089b0050270000"
+        sampleLibreDataInHex = sampleLibreDataInHex + "d6120001740ab150140796805a00eda6"
+        sampleLibreDataInHex = sampleLibreDataInHex + "148e1ac8048b896c"
+        
+        
+        testData.append(sampleLibreDataInHex)
+        sampleLibreDataInHex = ""
+        sampleLibreDataInHex = sampleLibreDataInHex + "7817901b030000000000000000000000"
+        sampleLibreDataInHex = sampleLibreDataInHex + "0000000000000000dad00f1e6407c810"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b006a07c80c9b006607c8f09a006607"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8389b007307c8dc9a007507c8d09a00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "7107c8e49a006407c80c9b005807c860"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b004507c83c9b003407c8e09b001e07"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8205c000807c8289c00fb06c83c9c00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "fb06c8489c007107c8f8da000508c820"
+        sampleLibreDataInHex = sampleLibreDataInHex + "db00fd08c824db00de09c8089b00c709"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8089b001309c8249b00ab07c870da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "f405c8d09a007f04c8489b002104c8d4"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b004d04c8609c009f04c8c89b00a704"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c810db009304c8fcda001a05c8a8da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "6305c850da00b504c8c8d900c803c814"
+        sampleLibreDataInHex = sampleLibreDataInHex + "da00a903c868da007604c8d09a005405"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8d4da004306c8c8da00c706c88cdb00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "3007c8c0db005207c80cdc008907c804"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9c00eb07c86c9b00f907c8549b009507"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c808db006707c8389b006807c80c9b00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "4507c8949b006507c8089b0050270000"
+        sampleLibreDataInHex = sampleLibreDataInHex + "d6120001740ab150140796805a00eda6"
+        sampleLibreDataInHex = sampleLibreDataInHex + "148e1ac8048b896c"
+        
+        testData.append(sampleLibreDataInHex)
+        sampleLibreDataInHex = ""
+        sampleLibreDataInHex = sampleLibreDataInHex + "7817901b030000000000000000000000"
+        sampleLibreDataInHex = sampleLibreDataInHex + "000000000000000067af041fe506c804"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9c00d706c8209c00c506c8209c00cd06"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8089c007307c8dc9a007507c8d09a00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "7107c8e49a006407c80c9b005807c860"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b004507c83c9b003407c8e09b001e07"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8205c000807c8289c00fb06c83c9c00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "fb06c8489c00f806c8149c000508c820"
+        sampleLibreDataInHex = sampleLibreDataInHex + "db00fd08c824db00de09c8089b00c709"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8089b001309c8249b00ab07c870da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "f405c8d09a007f04c8489b002104c8d4"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b004d04c8609c009f04c8c89b00a704"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c810db009304c8fcda001a05c8a8da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "6305c850da00b504c8c8d900c803c814"
+        sampleLibreDataInHex = sampleLibreDataInHex + "da00a903c868da007604c8d09a005405"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8d4da004306c8c8da00c706c88cdb00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "3007c8c0db005207c80cdc008907c804"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9c00eb07c86c9b00f907c8549b009507"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c808db006707c8389b006807c80c9b00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "e406c8049c006507c8089b0055270000"
+        sampleLibreDataInHex = sampleLibreDataInHex + "d6120001740ab150140796805a00eda6"
+        sampleLibreDataInHex = sampleLibreDataInHex + "148e1ac8048b896c"
+        
+        
+        
+        
+        testData.append(sampleLibreDataInHex)
+        sampleLibreDataInHex = ""
+        sampleLibreDataInHex = sampleLibreDataInHex + "7817901b030000000000000000000000"
+        sampleLibreDataInHex = sampleLibreDataInHex + "0000000000000000ca8e071fe506c804"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9c00d706c8209c00c506c8209c00cd06"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8089c00c506c8e09b00c706c8cc9b00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "cc06c8c09b006407c80c9b005807c860"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b004507c83c9b003407c8e09b001e07"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8205c000807c8289c00fb06c83c9c00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "fb06c8489c00f806c8149c000508c820"
+        sampleLibreDataInHex = sampleLibreDataInHex + "db00fd08c824db00de09c8089b00c709"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8089b001309c8249b00ab07c870da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "f405c8d09a007f04c8489b002104c8d4"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b004d04c8609c009f04c8c89b00a704"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c810db009304c8fcda001a05c8a8da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "6305c850da00b504c8c8d900c803c814"
+        sampleLibreDataInHex = sampleLibreDataInHex + "da00a903c868da007604c8d09a005405"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8d4da004306c8c8da00c706c88cdb00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "3007c8c0db005207c80cdc008907c804"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9c00eb07c86c9b00f907c8549b009507"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c808db006707c8389b006807c80c9b00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "e406c8049c006507c8089b0058270000"
+        sampleLibreDataInHex = sampleLibreDataInHex + "d6120001740ab150140796805a00eda6"
+        sampleLibreDataInHex = sampleLibreDataInHex + "148e1ac8048b896c"
+        
+        
+        testData.append(sampleLibreDataInHex)
+        sampleLibreDataInHex = ""
+        sampleLibreDataInHex = sampleLibreDataInHex + "7817901b030000000000000000000000"
+        sampleLibreDataInHex = sampleLibreDataInHex + "0000000000000000b9df0b1fe506c804"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9c00d706c8209c00c506c8209c00cd06"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8089c00c506c8e09b00c706c8cc9b00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "cc06c8c09b00cc06c8b09b00c806c8a8"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b00c906c89c9b00c806c88cdb001e07"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8205c000807c8289c00fb06c83c9c00"
+        
+        
+        sampleLibreDataInHex = sampleLibreDataInHex + "fb06c8489c00f806c8149c000508c820"
+        
+        sampleLibreDataInHex = sampleLibreDataInHex + "db00fd08c824db00de09c8089b00c709"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8089b001309c8249b00ab07c870da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "f405c8d09a007f04c8489b002104c8d4"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b004d04c8609c009f04c8c89b00a704"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c810db009304c8fcda001a05c8a8da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "6305c850da00b504c8c8d900c803c814"
+        sampleLibreDataInHex = sampleLibreDataInHex + "da00a903c868da007604c8d09a005405"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8d4da004306c8c8da00c706c88cdb00"
+        
+        sampleLibreDataInHex = sampleLibreDataInHex + "3007c8c0db005207c80cdc008907c804"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9c00eb07c86c9b00f907c8549b009507"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c808db006707c8389b006807c80c9b00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "e406c8049c006507c8089b005c270000"
+        sampleLibreDataInHex = sampleLibreDataInHex + "d6120001740ab150140796805a00eda6"
+        sampleLibreDataInHex = sampleLibreDataInHex + "148e1ac8048b896c"
+        
+        testData.append(sampleLibreDataInHex)
+        sampleLibreDataInHex = ""
+        
+        sampleLibreDataInHex = sampleLibreDataInHex + "7817901b030000000000000000000000"
+        sampleLibreDataInHex = sampleLibreDataInHex + "00000000000000001aa50c1fe506c804"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9c00d706c8209c00c506c8209c00cd06"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8089c00c506c8e09b00c706c8cc9b00"
+        
+        sampleLibreDataInHex = sampleLibreDataInHex + "cc06c8c09b00cc06c8b09b00c806c8a8"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b00c906c89c9b00c806c88cdb00c906"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8789b000807c8289c00fb06c83c9c00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "fb06c8489c00f806c8149c000508c820"
+        sampleLibreDataInHex = sampleLibreDataInHex + "db00fd08c824db00de09c8089b00c709"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8089b001309c8249b00ab07c870da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "f405c8d09a007f04c8489b002104c8d4"
+        
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b004d04c8609c009f04c8c89b00a704"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c810db009304c8fcda001a05c8a8da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "6305c850da00b504c8c8d900c803c814"
+        sampleLibreDataInHex = sampleLibreDataInHex + "da00a903c868da007604c8d09a005405"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8d4da004306c8c8da00c706c88cdb00"
+        
+        sampleLibreDataInHex = sampleLibreDataInHex + "3007c8c0db005207c80cdc008907c804"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9c00eb07c86c9b00f907c8549b009507"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c808db006707c8389b006807c80c9b00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "e406c8049c006507c8089b005d270000"
+        sampleLibreDataInHex = sampleLibreDataInHex + "d6120001740ab150140796805a00eda6"
+        sampleLibreDataInHex = sampleLibreDataInHex + "148e1ac8048b896c"
+        
+        testData.append(sampleLibreDataInHex)
+        sampleLibreDataInHex = ""
+        
+        sampleLibreDataInHex = sampleLibreDataInHex + "7817901b030000000000000000000000"
+        sampleLibreDataInHex = sampleLibreDataInHex + "00000000000000001aa50c1fe506c804"
+        
+        sampleLibreDataInHex = sampleLibreDataInHex + "9c00d706c8209c00c506c8209c00cd06"
+        
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8089c00c506c8e09b00c706c8cc9b00"
+        
+        sampleLibreDataInHex = sampleLibreDataInHex + "cc06c8c09b00cc06c8b09b00c806c8a8"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b00c906c89c9b00c806c88cdb00c906"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8789b000807c8289c00fb06c83c9c00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "fb06c8489c00f806c8149c000508c820"
+        sampleLibreDataInHex = sampleLibreDataInHex + "db00fd08c824db00de09c8089b00c709"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8089b001309c8249b00ab07c870da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "f405c8d09a007f04c8489b002104c8d4"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b004d04c8609c009f04c8c89b00a704"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c810db009304c8fcda001a05c8a8da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "6305c850da00b504c8c8d900c803c814"
+        sampleLibreDataInHex = sampleLibreDataInHex + "da00a903c868da007604c8d09a005405"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8d4da004306c8c8da00c706c88cdb00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "3007c8c0db005207c80cdc008907c804"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9c00eb07c86c9b00f907c8549b009507"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c808db006707c8389b006807c80c9b00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "e406c8049c006507c8089b005d270000"
+        sampleLibreDataInHex = sampleLibreDataInHex + "d6120001740ab150140796805a00eda6"
+        sampleLibreDataInHex = sampleLibreDataInHex + "148e1ac8048b896c"
+        
+        
+        
+        
+        testData.append(sampleLibreDataInHex)
+        sampleLibreDataInHex = ""
+        
+        sampleLibreDataInHex = sampleLibreDataInHex + "7817901b030000000000000000000000"
+        sampleLibreDataInHex = sampleLibreDataInHex + "0000000000000000c7f00d1fe506c804"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9c00d706c8209c00c506c8209c00cd06"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8089c00c506c8e09b00c706c8cc9b00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "cc06c8c09b00cc06c8b09b00c806c8a8"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b00c906c89c9b00c806c88cdb00c906"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8789b00cc06c8889b00fb06c83c9c00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "fb06c8489c00f806c8149c000508c820"
+        sampleLibreDataInHex = sampleLibreDataInHex + "db00fd08c824db00de09c8089b00c709"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8089b001309c8249b00ab07c870da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "f405c8d09a007f04c8489b002104c8d4"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b004d04c8609c009f04c8c89b00a704"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c810db009304c8fcda001a05c8a8da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "6305c850da00b504c8c8d900c803c814"
+        sampleLibreDataInHex = sampleLibreDataInHex + "da00a903c868da007604c8d09a005405"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8d4da004306c8c8da00c706c88cdb00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "3007c8c0db005207c80cdc008907c804"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9c00eb07c86c9b00f907c8549b009507"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c808db006707c8389b006807c80c9b00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "e406c8049c006507c8089b005e270000"
+        sampleLibreDataInHex = sampleLibreDataInHex + "d6120001740ab150140796805a00eda6"
+        sampleLibreDataInHex = sampleLibreDataInHex + "148e1ac8048b896c"
+        
+        
+        
+        
+        testData.append(sampleLibreDataInHex)
+        
+        sampleLibreDataInHex = ""
+        sampleLibreDataInHex = sampleLibreDataInHex + "7817901b030000000000000000000000"
+        sampleLibreDataInHex = sampleLibreDataInHex + "0000000000000000248b0f1fe506c804"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9c00d706c8209c00c506c8209c00cd06"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8089c00c506c8e09b00c706c8cc9b00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "cc06c8c09b00cc06c8b09b00c806c8a8"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b00c906c89c9b00c806c88cdb00c906"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8789b00cc06c8889b00d006c888db00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "cc06c8689b00f806c8149c000508c820"
+        sampleLibreDataInHex = sampleLibreDataInHex + "db00fd08c824db00de09c8089b00c709"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8089b001309c8249b00ab07c870da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "f405c8d09a007f04c8489b002104c8d4"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b004d04c8609c009f04c8c89b00a704"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c810db009304c8fcda001a05c8a8da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "6305c850da00b504c8c8d900c803c814"
+        sampleLibreDataInHex = sampleLibreDataInHex + "da00a903c868da007604c8d09a005405"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8d4da004306c8c8da00c706c88cdb00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "3007c8c0db005207c80cdc008907c804"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9c00eb07c86c9b00f907c8549b009507"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c808db006707c8389b006807c80c9b00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "e406c8049c006507c8089b005f270000"
+        sampleLibreDataInHex = sampleLibreDataInHex + "d6120001740ab150140796805a00eda6"
+        sampleLibreDataInHex = sampleLibreDataInHex + "148e1ac8048b896c"
+        
+        testData.append(sampleLibreDataInHex)
+        sampleLibreDataInHex = ""
+        sampleLibreDataInHex = sampleLibreDataInHex + "7817901b030000000000000000000000"
+        sampleLibreDataInHex = sampleLibreDataInHex + "00000000000000009349001fe506c804"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9c00d706c8209c00c506c8209c00cd06"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8089c00c506c8e09b00c706c8cc9b00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "cc06c8c09b00cc06c8b09b00c806c8a8"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b00c906c89c9b00c806c88cdb00c906"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8789b00cc06c8889b00d006c888db00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "cc06c8689b00c406c8849b000508c820"
+        sampleLibreDataInHex = sampleLibreDataInHex + "db00fd08c824db00de09c8089b00c709"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8089b001309c8249b00ab07c870da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "f405c8d09a007f04c8489b002104c8d4"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b004d04c8609c009f04c8c89b00a704"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c810db009304c8fcda001a05c8a8da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "6305c850da00b504c8c8d900c803c814"
+        sampleLibreDataInHex = sampleLibreDataInHex + "da00a903c868da007604c8d09a005405"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8d4da004306c8c8da00c706c88cdb00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "3007c8c0db005207c80cdc008907c804"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9c00eb07c86c9b00f907c8549b009507"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c808db006707c8389b006807c80c9b00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "e406c8049c006507c8089b0060270000"
+        sampleLibreDataInHex = sampleLibreDataInHex + "d6120001740ab150140796805a00eda6"
+        sampleLibreDataInHex = sampleLibreDataInHex + "148e1ac8048b896c"
+        
+        testData.append(sampleLibreDataInHex)
+        sampleLibreDataInHex = ""
+        sampleLibreDataInHex = sampleLibreDataInHex + "7817901b030000000000000000000000"
+        sampleLibreDataInHex = sampleLibreDataInHex + "00000000000000000af80400ba06c828"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9c00a806c8109c009806c8cc9b009106"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8f89b00c506c8e09b00c706c8cc9b00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "cc06c8c09b00cc06c8b09b00c806c8a8"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b00c906c89c9b00c806c88cdb00c906"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8789b00cc06c8889b00d006c888db00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "cc06c8689b00c406c8849b000508c820"
+        sampleLibreDataInHex = sampleLibreDataInHex + "db00fd08c824db00de09c8089b00c709"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8089b001309c8249b00ab07c870da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "f405c8d09a007f04c8489b002104c8d4"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9b004d04c8609c009f04c8c89b00a704"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c810db009304c8fcda001a05c8a8da00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "6305c850da00b504c8c8d900c803c814"
+        sampleLibreDataInHex = sampleLibreDataInHex + "da00a903c868da007604c8d09a005405"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c8d4da004306c8c8da00c706c88cdb00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "3007c8c0db005207c80cdc008907c804"
+        sampleLibreDataInHex = sampleLibreDataInHex + "9c00eb07c86c9b00f907c8549b009507"
+        sampleLibreDataInHex = sampleLibreDataInHex + "c808db006707c8389b006807c80c9b00"
+        sampleLibreDataInHex = sampleLibreDataInHex + "e406c8049c00c006c8849b0065270000"
+        sampleLibreDataInHex = sampleLibreDataInHex + "d6120001740ab150140796805a00eda6"
+        sampleLibreDataInHex = sampleLibreDataInHex + "148e1ac8048b896c"
         // CGMMiaoMiaoTransmitter.testPeripheralDidUpdateValue(libreDataAsHexString: testData[0], serialNumberAsHexString: nil, patchInfoAsHexString: patchInfoRange[0])
         
         let libreDataParser: LibreDataParser = LibreDataParser()
@@ -968,8 +1775,12 @@ class CGMMiaoMiaoTransmitter:BluetoothTransmitter, CGMTransmitter {
         
         for (index, data) in testData.enumerated() {
          
-            CGMMiaoMiaoTransmitter.testPeripheralDidUpdateValue(libreDataAsHexString: data, serialNumberAsHexString: nil, patchInfoAsHexString: patchInfoRange[index], cGMTransmitterDelegate: cGMTransmitterDelegate, libreDataParser: libreDataParser, testTimeStamp: nil)
-            
+            // libre 1
+            CGMMiaoMiaoTransmitter.testPeripheralDidUpdateValue(libreDataAsHexString: data, serialNumberAsHexString: "6bf36b6200a007e0", patchInfoAsHexString: nil, cGMTransmitterDelegate: cGMTransmitterDelegate, libreDataParser: libreDataParser, testTimeStamp: nil)
+
+            // libre 2
+            //CGMMiaoMiaoTransmitter.testPeripheralDidUpdateValue(libreDataAsHexString: data, serialNumberAsHexString: nil, patchInfoAsHexString: patchInfoRange[index], cGMTransmitterDelegate: cGMTransmitterDelegate, libreDataParser: libreDataParser, testTimeStamp: nil)
+
             testTimeStamp = testTimeStamp.addingTimeInterval(300.0)
          
         }

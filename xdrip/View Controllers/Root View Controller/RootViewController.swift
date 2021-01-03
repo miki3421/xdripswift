@@ -280,12 +280,12 @@ final class RootViewController: UIViewController {
             self.setupApplicationData()
             
             // test Libre2
-            if let bluetoothPeripheralManager = self.bluetoothPeripheralManager {
+           /* if let bluetoothPeripheralManager = self.bluetoothPeripheralManager {
                 let test = CGMLibre2Transmitter(address: "dummyaddress", name: "dummyname", bluetoothTransmitterDelegate: bluetoothPeripheralManager, cGMLibre2TransmitterDelegate: self, sensorSerialNumber: nil, cGMTransmitterDelegate: self, nonFixedSlopeEnabled: false, webOOPEnabled: false)
                 
                 test.testRange()
                 
-            }
+            }*/
 
             // housekeeper should be non nil here, kall housekeeper
             self.houseKeeper?.doAppStartUpHouseKeeping()
@@ -540,7 +540,7 @@ final class RootViewController: UIViewController {
 
                 // for testing only - for testing make sure there's a transmitter connected,
                 // eg a bubble or mm, not necessarily (better not) installed on a sensor
-                // CGMMiaoMiaoTransmitter.testRange(cGMTransmitterDelegate: self)
+                CGMMiaoMiaoTransmitter.testRange(cGMTransmitterDelegate: self)
                 
             }
             
@@ -607,6 +607,13 @@ final class RootViewController: UIViewController {
             return
             
         }
+        
+        debuglogging("IN PROCESSNEWGLUCOSEDATA, lengte = " + glucoseData.count.description)
+        //debuglogging("latest reading has value " + glucoseData[0].glucoseLevelRaw.description)
+        for reading in glucoseData {
+         debuglogging("reading ts = " + reading.timeStamp.toString(timeStyle: .medium, dateStyle: .none) + ", reading raw value = " + reading.glucoseLevelRaw.description)
+         }
+
         
         // check for flat values, this will only apply to Libre because in case of Dexcom there's always only one element in the glucoseData array
         glucoseData = glucoseData.checkFlatValues()
@@ -731,7 +738,11 @@ final class RootViewController: UIViewController {
                         // get latest3BgReadings
                         var latest3BgReadings = bgReadingsAccessor.getLatestBgReadings(limit: 3, howOld: nil, forSensor: activeSensor, ignoreRawData: false, ignoreCalculatedValue: false)
                         
+                        //debuglogging("new reading has raw value " + glucose.glucoseLevelRaw.description)
+                        
                         let newReading = calibrator.createNewBgReading(rawData: glucose.glucoseLevelRaw, timeStamp: glucose.timeStamp, sensor: activeSensor, last3Readings: &latest3BgReadings, lastCalibrationsForActiveSensorInLastXDays: &lastCalibrationsForActiveSensorInLastXDays, firstCalibration: firstCalibrationForActiveSensor, lastCalibration: lastCalibrationForActiveSensor, deviceName: self.getCGMTransmitterDeviceName(for: cgmTransmitter), nsManagedObjectContext: coreDataManager.mainManagedObjectContext)
+                        
+                        //debuglogging("created bgreading has value " + newReading.calculatedValue.description)
                         
                         if UserDefaults.standard.addDebugLevelLogsInTraceFileAndNSLog {
                             
@@ -1617,6 +1628,7 @@ final class RootViewController: UIViewController {
 extension RootViewController: CGMTransmitterDelegate {
     
     func newSensorDetected() {
+        debuglogging("new sensor detected")
         trace("new sensor detected", log: log, category: ConstantsLog.categoryRootView, type: .info)
         stopSensor()
     }
