@@ -236,6 +236,19 @@ class CGMLibre2Transmitter:BluetoothTransmitter, CGMTransmitter {
                 // if oop web not enabled, then don't pass libre1DerivedAlgorithmParameters
                 var parsedBLEData = Libre2BLEUtilities.parseBLEData(Data(try Libre2BLEUtilities.decryptBLE(sensorUID: sensorUID, data: rxBuffer)), libre1DerivedAlgorithmParameters: isWebOOPEnabled() ? UserDefaults.standard.libre1DerivedAlgorithmParameters : nil)
                 
+                trace("DEBUGLOGGING START", log: log, category: ConstantsLog.categoryCGMLibre2, type: .info)
+                if let libre1DerivedAlgorithmParameters = UserDefaults.standard.libre1DerivedAlgorithmParameters {
+                    
+                    trace("DEBUGLOGGING libre1DerivedAlgorithmParameters is not nil, that means oop web is used", log: log, category: ConstantsLog.categoryCGMLibre2, type: .info)
+                    
+                }
+                
+                for value in parsedBLEData.bleGlucose {
+                    
+                    trace("DEBUGLOGGING time %{public}@, value %{public}@", log: log, category: ConstantsLog.categoryCGMLibre2, type: .info, value.timeStamp.toString(timeStyle: .medium, dateStyle: .none), value.glucoseLevelRaw.description.replacingOccurrences(of: ".", with: ","))
+                    
+                }
+                
                 cgmTransmitterDelegate?.cgmTransmitterInfoReceived(glucoseData: &parsedBLEData.bleGlucose, transmitterBatteryInfo: nil, sensorTimeInMinutes: Int(parsedBLEData.sensorTimeInMinutes))
                 
             } catch {

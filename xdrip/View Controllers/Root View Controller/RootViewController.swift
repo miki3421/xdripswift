@@ -714,6 +714,8 @@ final class RootViewController: UIViewController {
             // iterate through array, elements are ordered by timestamp, first is the youngest, we need to start with the oldest
             for (index, glucose) in glucoseData.enumerated().reversed() {
                 
+                trace("DEBUGLOGGING processing reading with timestamp = %{public}@, value = %{public}@", log: self.log, category: ConstantsLog.categoryRootView, type: .info, glucose.timeStamp.toString(timeStyle: .medium, dateStyle: .none), glucose.glucoseLevelRaw.description.replacingOccurrences(of: ".", with: ","))
+                
                 // we only add new glucose values if 5 minutes - 10 seconds younger than latest already existing reading, or, if it's the latest, it needs to be just younger
                 let checktimestamp = Date(timeInterval: 5.0 * 60.0 - 10.0, since: timeStampLastBgReading)
                 
@@ -728,11 +730,7 @@ final class RootViewController: UIViewController {
                         
                         let newReading = calibrator.createNewBgReading(rawData: glucose.glucoseLevelRaw, timeStamp: glucose.timeStamp, sensor: activeSensor, last3Readings: &latest3BgReadings, lastCalibrationsForActiveSensorInLastXDays: &lastCalibrationsForActiveSensorInLastXDays, firstCalibration: firstCalibrationForActiveSensor, lastCalibration: lastCalibrationForActiveSensor, deviceName: self.getCGMTransmitterDeviceName(for: cgmTransmitter), nsManagedObjectContext: coreDataManager.mainManagedObjectContext)
                         
-                        if UserDefaults.standard.addDebugLevelLogsInTraceFileAndNSLog {
-                            
-                            trace("new reading created, timestamp = %{public}@, calculatedValue = %{public}@", log: self.log, category: ConstantsLog.categoryRootView, type: .info, newReading.timeStamp.description(with: .current), newReading.calculatedValue.description.replacingOccurrences(of: ".", with: ","))
-                            
-                        }
+                        trace("DEBUGLOGGING new reading created, timestamp = %{public}@, calculatedValue = %{public}@", log: self.log, category: ConstantsLog.categoryRootView, type: .info, newReading.timeStamp.description(with: .current), newReading.calculatedValue.description.replacingOccurrences(of: ".", with: ","))
                         
                         // save the newly created bgreading permenantly in coredata
                         coreDataManager.saveChanges()
