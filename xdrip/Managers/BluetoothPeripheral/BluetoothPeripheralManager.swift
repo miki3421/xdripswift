@@ -287,6 +287,14 @@ class BluetoothPeripheralManager: NSObject {
                         
                         if libre2.blePeripheral.shouldconnect {
                             
+                            if let serial = libre2.blePeripheral.sensorSerialNumber {
+                                trace("DEBUGLOGGING init Libre2,  sensorSerialNumber = %{public}@", log: log, category: ConstantsLog.categoryBluetoothPeripheralManager, type: .info, serial)
+
+                            } else {
+                                trace("DEBUGLOGGING init Libre2,  sensorSerialNumber = nil", log: log, category: ConstantsLog.categoryBluetoothPeripheralManager, type: .info)
+                            }
+                            
+                            
                             // create an instance of CGMDropletTransmitter, CGMDropletTransmitter will automatically try to connect to the Bubble with the address that is stored in bubble
                             // add it to the array of bluetoothTransmitters
                             bluetoothTransmitters.insert(CGMLibre2Transmitter(address: libre2.blePeripheral.address, name: libre2.blePeripheral.name, bluetoothTransmitterDelegate: self, cGMLibre2TransmitterDelegate: self, sensorSerialNumber: libre2.blePeripheral.sensorSerialNumber, cGMTransmitterDelegate: cgmTransmitterDelegate, nonFixedSlopeEnabled: libre2.blePeripheral.nonFixedSlopeEnabled, webOOPEnabled: libre2.blePeripheral.webOOPEnabled), at: index)

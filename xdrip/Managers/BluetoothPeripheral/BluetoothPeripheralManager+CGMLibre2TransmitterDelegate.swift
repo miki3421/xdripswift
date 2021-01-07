@@ -4,7 +4,11 @@ extension BluetoothPeripheralManager: CGMLibre2TransmitterDelegate {
     
     func received(serialNumber: String, from cGMLibre2Transmitter: CGMLibre2Transmitter) {
         
+        trace("DEBUGLOGGING in BluetoothPeripheralManager received serial number", log: log, category: ConstantsLog.categoryBluetoothPeripheralManager, type: .info)
+        
         guard let libre2 = findTransmitter(cGMLibre2Transmitter: cGMLibre2Transmitter) else {return}
+        
+        trace("DEBUGLOGGING storing sensorSerialNumber = %{public}@", log: log, category: ConstantsLog.categoryBluetoothPeripheralManager, type: .info, serialNumber)
         
         // store serial number in Libre2 object
         libre2.blePeripheral.sensorSerialNumber = serialNumber
