@@ -360,7 +360,12 @@ extension CGMLibre2Transmitter: LibreNFCDelegate {
                 
                 cgmTransmitterDelegate?.newSensorDetected()
                 
-                cGMLibre2TransmitterDelegate?.received(serialNumber: receivedSensorSerialNumber, from: self)
+                if let cGMLibre2TransmitterDelegate = cGMLibre2TransmitterDelegate {
+                    trace("DEBUGLOGGING calling cGMLibre2TransmitterDelegate received serial number %{public}@", log: log, category: ConstantsLog.categoryCGMLibre2, type: .info, receivedSensorSerialNumber)
+                    cGMLibre2TransmitterDelegate.received(serialNumber: receivedSensorSerialNumber, from: self)
+
+                }
+                
                 
             }
             
