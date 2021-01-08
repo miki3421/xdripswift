@@ -165,6 +165,13 @@ class Libre2BLEUtilities {
         // sensor gives values only every 1 minute but it gives only 4 readings for the last 8 minutes, ie with a gap of 1 minute, we try to fill those gaps using previous sessions, but this may not always be successful, (eg if there's been a disconnection of 2 minutes). So let's fill missing gaps of maximum 1 value
         bleGlucose.fill0Gaps(maxGapWidth: 1)
 
+        // check if the bleGlucose and the previous raw values have at least 5 equal values, if so this is an expired sensor that keeps sending the same values, in that case no further processing
+        if let previousRawGlucoseValues = UserDefaults.standard.previousRawGlucoseValues {
+            if bleGlucose.hasEqualValues(howManyToCheck: 5, otherArray: previousRawGlucoseValues) {
+                return ([GlucoseData](), wearTimeMinutes)
+            }
+        }
+
         // if first (most recent) value has rawGlucose 0.0 then return empty array
         if let first = bleGlucose.first {
             if first.glucoseLevelRaw == 0.0 {
