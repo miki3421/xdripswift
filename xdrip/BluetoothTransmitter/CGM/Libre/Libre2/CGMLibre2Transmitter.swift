@@ -225,10 +225,18 @@ class CGMLibre2Transmitter:BluetoothTransmitter, CGMTransmitter {
             do {
                 
                 // if libre1DerivedAlgorithmParameters not nil, but not matching serial number, then assign to nil (copied from LibreDataParser)
-                // we should be able to read libreSensorUID via bluetooth
+                // if weboopenabled, then don't proceed, because weboop needs libre1DerivedAlgorithmParameters
                 if let libre1DerivedAlgorithmParameters = UserDefaults.standard.libre1DerivedAlgorithmParameters, libre1DerivedAlgorithmParameters.serialNumber != sensorSerialNumber {
                     
                     UserDefaults.standard.libre1DerivedAlgorithmParameters = nil
+                    
+                    guard  !isWebOOPEnabled() else {
+                     
+                        trace("web oop enabled but libre1DerivedAlgorithmParameters is nil, no further processing", log: log, category: ConstantsLog.categoryCGMLibre2, type: .info)
+                        
+                        return
+                        
+                    }
                     
                 }
                 
