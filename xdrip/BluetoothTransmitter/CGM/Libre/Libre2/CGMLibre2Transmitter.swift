@@ -226,16 +226,16 @@ class CGMLibre2Transmitter:BluetoothTransmitter, CGMTransmitter {
                 
                 // if libre1DerivedAlgorithmParameters not nil, but not matching serial number, then assign to nil (copied from LibreDataParser)
                 // if weboopenabled, then don't proceed, because weboop needs libre1DerivedAlgorithmParameters
-                if let libre1DerivedAlgorithmParameters = UserDefaults.standard.libre1DerivedAlgorithmParameters, libre1DerivedAlgorithmParameters.serialNumber != sensorSerialNumber {
-                    
-                    UserDefaults.standard.libre1DerivedAlgorithmParameters = nil
-                    
-                    guard  !isWebOOPEnabled() else {
-                     
-                        trace("web oop enabled but libre1DerivedAlgorithmParameters is nil, no further processing", log: log, category: ConstantsLog.categoryCGMLibre2, type: .info)
+                // if libre1DerivedAlgorithmParameters is nil, but not weboopenabled, then also no further processing
+                // this may happen in case the serialNumber is not correctly read from NFC or stored in coredata
+                if isWebOOPEnabled() {
+
+                    guard let libre1DerivedAlgorithmParameters = UserDefaults.standard.libre1DerivedAlgorithmParameters, libre1DerivedAlgorithmParameters.serialNumber == sensorSerialNumber else {
+
+                        trace("web oop enabled but libre1DerivedAlgorithmParameters is nil or libre1DerivedAlgorithmParameters.serialNumber != sensorSerialNumber, no further processing", log: log, category: ConstantsLog.categoryCGMLibre2, type: .info)
                         
                         return
-                        
+
                     }
                     
                 }
